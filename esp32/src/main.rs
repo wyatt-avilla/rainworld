@@ -18,7 +18,7 @@ async fn main(spawner: Spawner) {
     let nvs = EspDefaultNvsPartition::take().unwrap();
     let timer_service = EspTaskTimerService::new().unwrap();
 
-    let _wifi = wifi::connect_to(
+    let wifi = wifi::connect_to(
         dotenv!("WIFI_SSID"),
         dotenv!("WIFI_PASSWORD"),
         &mut peripherals.modem,
@@ -28,6 +28,11 @@ async fn main(spawner: Spawner) {
     )
     .await
     .unwrap();
+
+    log::info!(
+        "Device ip: {}",
+        wifi.wifi().ap_netif().get_ip_info().unwrap().ip
+    );
 
     core::future::pending::<()>().await;
 }
