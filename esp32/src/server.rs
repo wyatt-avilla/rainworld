@@ -1,8 +1,10 @@
-use esp_idf_hal::io::{EspIOError, Write};
+use esp_idf_hal::io::EspIOError;
 use esp_idf_hal::sys::EspError;
 use esp_idf_svc::http::server::{Configuration, EspHttpServer};
 use esp_idf_svc::http::Method;
 use thiserror::Error;
+
+use crate::sensors;
 
 #[derive(Error, Debug)]
 pub enum ServerCreationError {
@@ -18,11 +20,7 @@ pub fn new_server() -> Result<EspHttpServer<'static>, ServerCreationError> {
         EspHttpServer::new(&Configuration::default()).map_err(ServerCreationError::Init)?;
 
     server
-        .fn_handler("/index.html", Method::Get, |request| {
-            request
-                .into_ok_response()?
-                .write_all(b"<html><body>Hello world!</body></html>")
-        })
+        .fn_handler(shared::ESP32_ENDPOINT, Method::Get, sensors::mock_plants)
         .map_err(ServerCreationError::FunctionRegistration)?;
 
     Ok(server)

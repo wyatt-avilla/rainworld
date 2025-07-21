@@ -719,6 +719,8 @@ dependencies = [
  "esp-idf-hal",
  "esp-idf-svc",
  "log",
+ "serde_json",
+ "shared",
  "thiserror 2.0.12",
 ]
 
@@ -1327,6 +1329,14 @@ dependencies = [
  "memchr",
  "ryu",
  "serde",
+]
+
+[[package]]
+name = "shared"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

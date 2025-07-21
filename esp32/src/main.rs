@@ -5,6 +5,7 @@ use esp_idf_svc::{
     eventloop::EspSystemEventLoop, nvs::EspDefaultNvsPartition, timer::EspTaskTimerService,
 };
 
+mod sensors;
 mod server;
 mod wifi;
 
