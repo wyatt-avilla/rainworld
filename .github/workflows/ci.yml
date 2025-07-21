@@ -17,4 +17,5 @@ jobs:
           touch .env
           echo "WIFI_SSID=ssid" >> .env
           echo "WIFI_PASSWORD=password" >> .env
+      - name: Build
       - run: nix build .#esp32
