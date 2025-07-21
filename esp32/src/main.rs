@@ -5,6 +5,7 @@ use esp_idf_svc::{
     eventloop::EspSystemEventLoop, nvs::EspDefaultNvsPartition, timer::EspTaskTimerService,
 };
 
+mod server;
 mod wifi;
 
 #[embassy_executor::main]
@@ -33,6 +34,8 @@ async fn main(spawner: Spawner) {
         "Device ip: {}",
         wifi.wifi().ap_netif().get_ip_info().unwrap().ip
     );
+
+    let _server = server::new_server();
 
     core::future::pending::<()>().await;
 }
