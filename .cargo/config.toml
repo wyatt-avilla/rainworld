@@ -9,4 +9,4 @@ build-std = ["std", "panic_abort"]
 [env]
 MCU = "esp32"
 ESP_IDF_VERSION = "v5.3.2"
-ESP_IDF_SDKCONFIG_DEFAULTS = "client/sdkconfig.defaults"
+ESP_IDF_SDKCONFIG_DEFAULTS = "esp32/sdkconfig.defaults"
