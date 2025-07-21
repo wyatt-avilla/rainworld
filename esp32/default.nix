@@ -175,6 +175,11 @@ in
         cargo build -j $(nproc) -p ${packageName} --offline --release --target=${buildConfig.target}
       '';
 
+      checkPhase = ''
+        cargo clippy --package ${packageName} --all-features --target=${buildConfig.target} -- -W clippy::pedantic -D warnings
+        cargo fmt --package ${packageName} --check
+      '';
+
       installPhase = ''
         mkdir -p $out
         cp target/${buildConfig.target}/release/esp32 $out
