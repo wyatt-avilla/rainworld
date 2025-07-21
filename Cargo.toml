@@ -1,0 +1,5 @@
+[workspace]
+members = [ "esp32" ]
+resolver = "2"
+
+default-members = []
