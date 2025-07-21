@@ -18,4 +18,4 @@ jobs:
           echo "WIFI_SSID=ssid" >> .env
           echo "WIFI_PASSWORD=password" >> .env
       - name: Build
-      - run: nix build .#esp32
+        run: nix build .#esp32
