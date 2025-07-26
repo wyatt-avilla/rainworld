@@ -132,7 +132,25 @@ let
     target = "xtensa-esp32-espidf";
 
     bindgenExtraClangArgs = [ "-include ${pkgs.glibc_multi.dev}/include/features.h" ];
+
+    environmentVariables = {
+      CARGO_TARGET_XTENSA_ESP32_ESPIDF_LINKER = "ldproxy";
+      CARGO_TARGET_XTENSA_ESP32_ESPIDF_RUNNER = "espflash flash --monitor";
+      CARGO_TARGET_XTENSA_ESP32_ESPIDF_RUSTFLAGS = "--cfg espidf_time64";
+
+      CARGO_UNSTABLE_BUILD_STD = "std,panic_abort";
+
+      MCU = "esp32";
+      ESP_IDF_VERSION = "v5.4.1";
+      ESP_IDF_SDKCONFIG_DEFAULTS = "${self}/esp32/sdkconfig.defaults";
+    };
   };
+
+  attrSetToEnv =
+    as:
+    pkgs.lib.concatStringsSep "\n" (
+      pkgs.lib.mapAttrsToList (name: value: "export ${name}=\"${value}\"") as
+    );
 in
 {
   devShells.esp32 = pkgs.mkShell {
@@ -145,6 +163,8 @@ in
       export CARGO_BUILD_TARGET="${buildConfig.target}"
       export PATH="${espRustToolchain}/bin:$PATH"
       BINDGEN_EXTRA_CLANG_ARGS="$BINDGEN_EXTRA_CLANG_ARGS ${pkgs.lib.concatStringsSep " " buildConfig.bindgenExtraClangArgs}"
+
+      ${attrSetToEnv buildConfig.environmentVariables}
     '';
   };
 
@@ -165,6 +185,8 @@ in
 
       configurePhase = ''
         BINDGEN_EXTRA_CLANG_ARGS="$BINDGEN_EXTRA_CLANG_ARGS ${pkgs.lib.concatStringsSep " " buildConfig.bindgenExtraClangArgs}"
+
+        ${attrSetToEnv buildConfig.environmentVariables}
 
         touch .env
         echo "WIFI_SSID=ssid" >> .env
