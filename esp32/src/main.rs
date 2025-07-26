@@ -36,7 +36,7 @@ async fn main(spawner: Spawner) {
         wifi.wifi().ap_netif().get_ip_info().unwrap().ip
     );
 
-    let _server = server::new_server();
+    let _server = server::new_server(sensors::mock_plants);
 
     core::future::pending::<()>().await;
 }
