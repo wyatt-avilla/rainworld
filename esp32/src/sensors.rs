@@ -4,30 +4,53 @@ use esp_idf_hal::{
         oneshot::{config::AdcChannelConfig, AdcChannelDriver, AdcDriver},
         ADC1,
     },
-    gpio::{ADCPin, Gpio32},
+    gpio::{ADCPin, Gpio32, Gpio33},
     io::{EspIOError, Write},
-    peripheral::Peripheral,
     sys::EspError,
 };
 use esp_idf_svc::http::server::{EspHttpConnection, Request};
 use thiserror::Error;
 
-pub trait MoistureSensorPin {}
+pub struct MoistureSensor<'d, P: ADCPin<Adc = ADC1>> {
+    driver: &'d AdcDriver<'d, ADC1>,
+    channel: AdcChannelDriver<'d, P, &'d AdcDriver<'d, ADC1>>,
+}
 
-impl MoistureSensorPin for Gpio32 {}
+impl<P> MoistureSensor<'_, P>
+where
+    P: ADCPin<Adc = ADC1>,
+{
+    pub fn new<'a>(
+        driver: &'a AdcDriver<'a, ADC1>,
+        pin: P,
+    ) -> Result<MoistureSensor<'a, P>, EspError> {
+        let config = AdcChannelConfig {
+            attenuation: DB_11,
+            ..Default::default()
+        };
 
-pub fn moisture_value_from(
-    adc: &AdcDriver<'_, ADC1>,
-    pin: impl MoistureSensorPin + Peripheral<P = impl ADCPin<Adc = ADC1>>,
-) -> Result<u16, EspError> {
-    let config = AdcChannelConfig {
-        attenuation: DB_11,
-        ..Default::default()
-    };
+        let channel = AdcChannelDriver::new(driver, pin, &config)?;
 
-    let mut adc_pin = AdcChannelDriver::new(adc, pin, &config)?;
+        Ok(MoistureSensor { driver, channel })
+    }
 
-    adc.read(&mut adc_pin)
+    pub fn read(&mut self) -> Result<u16, EspError> {
+        self.driver.read(&mut self.channel)
+    }
+}
+
+pub enum AnyMoistureSensor<'d> {
+    Gpio32(MoistureSensor<'d, Gpio32>),
+    Gpio33(MoistureSensor<'d, Gpio33>),
+}
+
+impl<'d> AnyMoistureSensor<'d> {
+    pub fn read(&mut self) -> Result<u16, EspError> {
+        match self {
+            AnyMoistureSensor::Gpio32(sensor) => sensor.read(),
+            AnyMoistureSensor::Gpio33(sensor) => sensor.read(),
+        }
+    }
 }
 
 #[derive(Error, Debug)]
@@ -43,9 +66,10 @@ pub enum MockPlantsError {
 }
 
 pub fn mock_plants(request: Request<&mut EspHttpConnection<'_>>) -> Result<(), MockPlantsError> {
-    let plant = shared::PlantStatus {
-        scientific_name: shared::PlantName::MonsteraDeliciosa,
-        moisture_level: 10,
+    let plant = shared::Plant {
+        id: 0,
+        name: "fake_name".to_string(),
+        scientific_name: shared::ScientificPlantName::MonsteraDeliciosa,
     };
 
     let json = serde_json::to_string(&[&plant]).map_err(MockPlantsError::Serialization)?;

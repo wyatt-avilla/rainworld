@@ -1,10 +1,11 @@
 use dotenvy_macro::dotenv;
 use embassy_executor::Spawner;
-use esp_idf_hal::peripherals::Peripherals;
+use esp_idf_hal::{adc::oneshot::AdcDriver, peripherals::Peripherals};
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop, nvs::EspDefaultNvsPartition, timer::EspTaskTimerService,
 };
 
+mod config;
 mod sensors;
 mod server;
 mod wifi;
@@ -19,6 +20,7 @@ async fn main(spawner: Spawner) {
     let sys_loop = EspSystemEventLoop::take().unwrap();
     let nvs = EspDefaultNvsPartition::take().unwrap();
     let timer_service = EspTaskTimerService::new().unwrap();
+    let adc = AdcDriver::new(peripherals.adc1).unwrap();
 
     let wifi = wifi::connect_to(
         dotenv!("WIFI_SSID"),
@@ -35,6 +37,8 @@ async fn main(spawner: Spawner) {
         "Device ip: {}",
         wifi.wifi().ap_netif().get_ip_info().unwrap().ip
     );
+
+    let plants_with_hardware = config::plant_hardware_associations(&adc, peripherals.pins).unwrap();
 
     let _server = server::new_server(sensors::mock_plants);
 
