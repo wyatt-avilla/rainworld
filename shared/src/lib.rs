@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 pub static ESP32_ENDPOINT: &str = "/api";
 
@@ -6,6 +7,7 @@ pub static ESP32_ENDPOINT: &str = "/api";
 pub enum ScientificPlantName {
     FicusElastica,
     MonsteraDeliciosa,
+    DieffenbachiaReflector,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -19,4 +21,10 @@ pub struct Plant {
 pub struct PlantStatus {
     pub plant: Plant,
     pub moisture_level: u16,
+}
+
+#[derive(Error, Debug, Serialize, Deserialize)]
+pub enum Esp32Error {
+    #[error("Couldn't read from moisture sensor")]
+    SensorError,
 }

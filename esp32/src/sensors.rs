@@ -4,7 +4,7 @@ use esp_idf_hal::{
         oneshot::{config::AdcChannelConfig, AdcChannelDriver, AdcDriver},
         ADC1,
     },
-    gpio::{ADCPin, Gpio32, Gpio33},
+    gpio::{ADCPin, Gpio32, Gpio33, Gpio34, Gpio35, Gpio39},
     io::{EspIOError, Write},
     sys::EspError,
 };
@@ -42,6 +42,9 @@ where
 pub enum AnyMoistureSensor<'d> {
     Gpio32(MoistureSensor<'d, Gpio32>),
     Gpio33(MoistureSensor<'d, Gpio33>),
+    Gpio34(MoistureSensor<'d, Gpio34>),
+    Gpio35(MoistureSensor<'d, Gpio35>),
+    Gpio39(MoistureSensor<'d, Gpio39>),
 }
 
 impl<'d> AnyMoistureSensor<'d> {
@@ -49,6 +52,9 @@ impl<'d> AnyMoistureSensor<'d> {
         match self {
             AnyMoistureSensor::Gpio32(sensor) => sensor.read(),
             AnyMoistureSensor::Gpio33(sensor) => sensor.read(),
+            AnyMoistureSensor::Gpio34(sensor) => sensor.read(),
+            AnyMoistureSensor::Gpio35(sensor) => sensor.read(),
+            AnyMoistureSensor::Gpio39(sensor) => sensor.read(),
         }
     }
 }

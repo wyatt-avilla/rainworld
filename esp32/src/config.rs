@@ -18,18 +18,42 @@ pub fn plant_hardware_associations<'a>(
         PlantWithHardware::new(
             Plant {
                 id: ids.next().unwrap(),
-                name: String::from("fake name 1"),
-                scientific_name: ScientificPlantName::FicusElastica,
+                name: String::from("Top Shelf Monstera"),
+                scientific_name: ScientificPlantName::MonsteraDeliciosa,
             },
             AnyMoistureSensor::Gpio32(MoistureSensor::new(driver, pins.gpio32)?),
         ),
         PlantWithHardware::new(
             Plant {
                 id: ids.next().unwrap(),
-                name: String::from("fake name 1"),
+                name: String::from("Middle Shelf Rubber Tree"),
                 scientific_name: ScientificPlantName::FicusElastica,
             },
             AnyMoistureSensor::Gpio33(MoistureSensor::new(driver, pins.gpio33)?),
+        ),
+        PlantWithHardware::new(
+            Plant {
+                id: ids.next().unwrap(),
+                name: String::from("Middle Shelf Monstera"),
+                scientific_name: ScientificPlantName::FicusElastica,
+            },
+            AnyMoistureSensor::Gpio34(MoistureSensor::new(driver, pins.gpio34)?),
+        ),
+        PlantWithHardware::new(
+            Plant {
+                id: ids.next().unwrap(),
+                name: String::from("Middle Shelf Camo"),
+                scientific_name: ScientificPlantName::FicusElastica,
+            },
+            AnyMoistureSensor::Gpio35(MoistureSensor::new(driver, pins.gpio35)?),
+        ),
+        PlantWithHardware::new(
+            Plant {
+                id: ids.next().unwrap(),
+                name: String::from("Bottom Shelf Monstera"),
+                scientific_name: ScientificPlantName::FicusElastica,
+            },
+            AnyMoistureSensor::Gpio39(MoistureSensor::new(driver, pins.gpio39)?),
         ),
     ];
 

@@ -1,4 +1,3 @@
-use esp_idf_hal::sys::EspError;
 use shared::{Plant, PlantStatus};
 
 use crate::sensors::AnyMoistureSensor;
@@ -16,10 +15,13 @@ impl<'a> PlantWithHardware<'a> {
         }
     }
 
-    pub fn status(&mut self) -> Result<PlantStatus, EspError> {
+    pub fn status(&mut self) -> Result<PlantStatus, shared::Esp32Error> {
         Ok(PlantStatus {
             plant: self.plant.clone(),
-            moisture_level: self.moisture_sensor.read()?,
+            moisture_level: self
+                .moisture_sensor
+                .read()
+                .map_err(|_| shared::Esp32Error::SensorError)?,
         })
     }
 }
