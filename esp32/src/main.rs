@@ -21,7 +21,7 @@ async fn main(spawner: Spawner) {
     let sys_loop = EspSystemEventLoop::take().unwrap();
     let nvs = EspDefaultNvsPartition::take().unwrap();
     let timer_service = EspTaskTimerService::new().unwrap();
-    let adc = AdcDriver::new(peripherals.adc1).unwrap();
+    let static_adc = Box::leak(Box::new(AdcDriver::new(peripherals.adc1).unwrap()));
 
     let wifi = wifi::connect_to(
         dotenv!("WIFI_SSID"),
@@ -39,9 +39,11 @@ async fn main(spawner: Spawner) {
         wifi.wifi().ap_netif().get_ip_info().unwrap().ip
     );
 
-    let plants_with_hardware = config::plant_hardware_associations(&adc, peripherals.pins).unwrap();
+    let plants_with_hardware = std::sync::Arc::new(
+        config::plant_hardware_associations(static_adc, peripherals.pins).unwrap(),
+    );
 
-    let _server = server::new_server(sensors::mock_plants);
+    let _server = server::new_server(&plants_with_hardware);
 
     core::future::pending::<()>().await;
 }

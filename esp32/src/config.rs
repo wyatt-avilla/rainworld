@@ -8,10 +8,10 @@ use shared::{Plant, ScientificPlantName};
 use crate::plant_with_hardware::PlantWithHardware;
 use crate::sensors::{AnyMoistureSensor, MoistureSensor};
 
-pub fn plant_hardware_associations<'a>(
-    driver: &'a AdcDriver<'a, ADC1>,
+pub fn plant_hardware_associations(
+    driver: &'static mut AdcDriver<'static, ADC1>,
     pins: Pins,
-) -> Result<Vec<PlantWithHardware<'a>>, EspError> {
+) -> Result<Vec<PlantWithHardware<'static>>, EspError> {
     let mut ids = 1..;
 
     let v = vec![
