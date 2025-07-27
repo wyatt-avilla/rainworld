@@ -11,9 +11,9 @@ use esp_idf_hal::{
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::blocking_mutex::Mutex;
 
-pub struct MoistureSensor<'d, P: ADCPin<Adc = ADC1>> {
-    driver: &'d AdcDriver<'d, ADC1>,
-    channel: Mutex<CriticalSectionRawMutex, AdcChannelDriver<'d, P, &'d AdcDriver<'d, ADC1>>>,
+pub struct MoistureSensor<'a, P: ADCPin<Adc = ADC1>> {
+    driver: &'a AdcDriver<'a, ADC1>,
+    channel: Mutex<CriticalSectionRawMutex, AdcChannelDriver<'a, P, &'a AdcDriver<'a, ADC1>>>,
 }
 
 impl<P> MoistureSensor<'_, P>
@@ -39,12 +39,12 @@ where
     }
 }
 
-pub enum AnyMoistureSensor<'d> {
-    Gpio32(MoistureSensor<'d, Gpio32>),
-    Gpio33(MoistureSensor<'d, Gpio33>),
-    Gpio34(MoistureSensor<'d, Gpio34>),
-    Gpio35(MoistureSensor<'d, Gpio35>),
-    Gpio39(MoistureSensor<'d, Gpio39>),
+pub enum AnyMoistureSensor<'a> {
+    Gpio32(MoistureSensor<'a, Gpio32>),
+    Gpio33(MoistureSensor<'a, Gpio33>),
+    Gpio34(MoistureSensor<'a, Gpio34>),
+    Gpio35(MoistureSensor<'a, Gpio35>),
+    Gpio39(MoistureSensor<'a, Gpio39>),
 }
 
 impl AnyMoistureSensor<'_> {

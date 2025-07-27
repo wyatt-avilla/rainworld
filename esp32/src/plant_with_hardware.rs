@@ -2,9 +2,9 @@ use shared::{Plant, PlantStatus};
 
 use crate::sensors::AnyMoistureSensor;
 
-pub struct PlantWithHardware<'s> {
+pub struct PlantWithHardware<'a> {
     plant: Plant,
-    moisture_sensor: AnyMoistureSensor<'s>,
+    moisture_sensor: AnyMoistureSensor<'a>,
 }
 
 impl<'a> PlantWithHardware<'a> {
