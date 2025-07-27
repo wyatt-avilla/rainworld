@@ -3,6 +3,8 @@ use thiserror::Error;
 
 pub static ESP32_ENDPOINT: &str = "/api";
 
+pub type APIResponse = Vec<Result<PlantStatus, Esp32Error>>;
+
 #[derive(Serialize, Deserialize, Clone)]
 pub enum ScientificPlantName {
     FicusElastica,

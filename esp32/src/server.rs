@@ -21,7 +21,7 @@ fn get_handler(
     plants_with_hardware: Arc<Vec<PlantWithHardware<'_>>>,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), EspIOError> + use<'_> {
     let handler = move |request: Request<&mut EspHttpConnection<'_>>| -> Result<(), EspIOError> {
-        let statuses: Vec<_> = plants_with_hardware
+        let statuses: shared::APIResponse = plants_with_hardware
             .iter()
             .map(PlantWithHardware::status)
             .collect();
