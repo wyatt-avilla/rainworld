@@ -2,13 +2,13 @@ use serde::{Deserialize, Serialize};
 
 pub static ESP32_ENDPOINT: &str = "/api";
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub enum ScientificPlantName {
     FicusElastica,
     MonsteraDeliciosa,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Plant {
     pub id: u16,
     pub name: String,
