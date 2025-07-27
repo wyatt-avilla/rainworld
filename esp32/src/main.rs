@@ -6,6 +6,7 @@ use esp_idf_svc::{
 };
 
 mod config;
+mod plant_with_hardware;
 mod sensors;
 mod server;
 mod wifi;
