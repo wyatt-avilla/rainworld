@@ -11,9 +11,12 @@ use esp_idf_hal::{
 use esp_idf_svc::http::server::{EspHttpConnection, Request};
 use thiserror::Error;
 
+use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
+use embassy_sync::blocking_mutex::Mutex;
+
 pub struct MoistureSensor<'d, P: ADCPin<Adc = ADC1>> {
     driver: &'d AdcDriver<'d, ADC1>,
-    channel: AdcChannelDriver<'d, P, &'d AdcDriver<'d, ADC1>>,
+    channel: Mutex<CriticalSectionRawMutex, AdcChannelDriver<'d, P, &'d AdcDriver<'d, ADC1>>>,
 }
 
 impl<P> MoistureSensor<'_, P>
@@ -29,13 +32,13 @@ where
             ..Default::default()
         };
 
-        let channel = AdcChannelDriver::new(driver, pin, &config)?;
+        let channel = Mutex::new(AdcChannelDriver::new(driver, pin, &config)?);
 
         Ok(MoistureSensor { driver, channel })
     }
 
-    pub fn read(&mut self) -> Result<u16, EspError> {
-        self.driver.read(&mut self.channel)
+    pub fn read(&self) -> Result<u16, EspError> {
+        unsafe { self.channel.lock_mut(|channel| self.driver.read(channel)) }
     }
 }
 
@@ -48,7 +51,7 @@ pub enum AnyMoistureSensor<'d> {
 }
 
 impl<'d> AnyMoistureSensor<'d> {
-    pub fn read(&mut self) -> Result<u16, EspError> {
+    pub fn read(&self) -> Result<u16, EspError> {
         match self {
             AnyMoistureSensor::Gpio32(sensor) => sensor.read(),
             AnyMoistureSensor::Gpio33(sensor) => sensor.read(),

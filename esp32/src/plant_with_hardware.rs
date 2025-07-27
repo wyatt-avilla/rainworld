@@ -15,7 +15,7 @@ impl<'a> PlantWithHardware<'a> {
         }
     }
 
-    pub fn status(&mut self) -> Result<PlantStatus, shared::Esp32Error> {
+    pub fn status(&self) -> Result<PlantStatus, shared::Esp32Error> {
         Ok(PlantStatus {
             plant: self.plant.clone(),
             moisture_level: self
