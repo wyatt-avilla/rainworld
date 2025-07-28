@@ -3,7 +3,7 @@ use thiserror::Error;
 
 pub static ESP32_ENDPOINT: &str = "/api";
 
-pub type APIResponse = Vec<Result<PlantStatus, Esp32Error>>;
+pub type APIResponse = Vec<PlantStatus>;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub enum ScientificPlantName {
@@ -22,7 +22,7 @@ pub struct Plant {
 #[derive(Serialize, Deserialize)]
 pub struct PlantStatus {
     pub plant: Plant,
-    pub moisture_level: u16,
+    pub moisture_level: Result<u16, Esp32Error>,
 }
 
 #[derive(Error, Debug, Serialize, Deserialize)]

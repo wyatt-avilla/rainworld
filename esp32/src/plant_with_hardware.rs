@@ -15,13 +15,13 @@ impl<'a> PlantWithHardware<'a> {
         }
     }
 
-    pub fn status(&self) -> Result<PlantStatus, shared::Esp32Error> {
-        Ok(PlantStatus {
+    pub fn status(&self) -> PlantStatus {
+        PlantStatus {
             plant: self.plant.clone(),
             moisture_level: self
                 .moisture_sensor
                 .read()
-                .map_err(|_| shared::Esp32Error::SensorError)?,
-        })
+                .map_err(|_| shared::Esp32Error::SensorError),
+        }
     }
 }
