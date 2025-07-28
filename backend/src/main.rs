@@ -6,6 +6,10 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
+    /// IP address for accompanying ESP32
+    #[arg(short, long)]
+    esp32_ip: String,
+
     /// Port to run the server on
     #[arg(short, long, default_value_t = shared::BACKEND_SERVER_PORT)]
     port: u16,
@@ -27,7 +31,11 @@ async fn main() -> anyhow::Result<()> {
         .with_max_level(args.log_level)
         .init();
 
-    log::info!("Running server on port {}", args.port,);
+    log::info!(
+        "Running server on port {}, expecting ESP32 at '{}'",
+        args.port,
+        args.esp32_ip
+    );
 
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", args.port).as_str()).await?;
 
