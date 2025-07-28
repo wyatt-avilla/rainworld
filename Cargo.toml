@@ -1,5 +1,5 @@
 [workspace]
-members = [ "esp32" , "shared"]
+members = [ "backend", "esp32" , "shared"]
 resolver = "2"
 
 default-members = []

@@ -32,10 +32,12 @@
             esp-dev
             ;
         };
+
+        backendOutputs = import ./backend { inherit self pkgs system; };
       in
       {
-        devShells = esp32Outputs.devShells;
-        packages = esp32Outputs.packages;
+        devShells = esp32Outputs.devShells // backendOutputs.devShells;
+        packages = esp32Outputs.packages // backendOutputs.packages;
         inherit (esp32Outputs) apps;
       }
     );
