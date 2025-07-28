@@ -10,10 +10,6 @@ struct Args {
     #[arg(short, long, default_value_t = shared::BACKEND_SERVER_PORT)]
     port: u16,
 
-    /// Number of workers for the server
-    #[arg(short, long, default_value_t = 1)]
-    workers: usize,
-
     /// Log level, one of (INFO, WARN, ERROR, DEBUG, TRACE)
     #[arg(short, long, default_value_t = tracing::Level::INFO)]
     log_level: tracing::Level,
@@ -31,16 +27,13 @@ async fn main() {
         .with_max_level(args.log_level)
         .init();
 
-    log::info!(
-        "Running server on port {} with {} worker{}",
-        args.port,
-        args.workers,
-        if args.workers > 1 { "s" } else { "" }
-    );
+    log::info!("Running server on port {}", args.port,);
 
-    let app = Router::new().route("/", get(root_handler));
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", args.port).as_str())
         .await
         .unwrap();
+
+    let app = Router::new().route("/", get(root_handler));
+
     axum::serve(listener, app).await.unwrap();
 }
