@@ -20,7 +20,7 @@ async fn root_handler() -> &'static str {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
     tracing_subscriber::fmt()
@@ -29,11 +29,11 @@ async fn main() {
 
     log::info!("Running server on port {}", args.port,);
 
-    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", args.port).as_str())
-        .await
-        .unwrap();
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", args.port).as_str()).await?;
 
     let app = Router::new().route("/", get(root_handler));
 
-    axum::serve(listener, app).await.unwrap();
+    axum::serve(listener, app).await?;
+
+    Ok(())
 }
