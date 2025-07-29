@@ -1,0 +1,20 @@
+repos:
+  - repo: local
+    hooks:
+      - id: nixfmt
+        name: Run nixfmt
+        language: system
+        pass_filenames: false
+        entry: nix build .#checks.x86_64-linux.formatting
+
+      - id: statix
+        name: Run statix
+        language: system
+        pass_filenames: false
+        entry: nix build .#checks.x86_64-linux.linting
+
+      - id: deadnix
+        name: Run deadnix
+        language: system
+        pass_filenames: false
+        entry: nix build .#checks.x86_64-linux.dead-code

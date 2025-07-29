@@ -6,6 +6,11 @@
     flake-utils.url = "github:numtide/flake-utils";
     esp-dev.url = "github:mirrexagon/nixpkgs-esp-dev";
     rust-overlay.url = "github:oxalica/rust-overlay";
+
+    nix-checks = {
+      url = "github:wyatt-avilla/nix-ci";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -15,6 +20,7 @@
       flake-utils,
       esp-dev,
       rust-overlay,
+      nix-checks,
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
@@ -38,6 +44,22 @@
       {
         devShells = esp32Outputs.devShells // backendOutputs.devShells;
         packages = esp32Outputs.packages // backendOutputs.packages;
+        checks = {
+          formatting = nix-checks.lib.mkFormattingCheck {
+            inherit pkgs;
+            src = self;
+          };
+
+          linting = nix-checks.lib.mkLintingCheck {
+            inherit pkgs;
+            src = self;
+          };
+
+          dead-code = nix-checks.lib.mkDeadCodeCheck {
+            inherit pkgs;
+            src = self;
+          };
+        };
         inherit (esp32Outputs) apps;
       }
     );

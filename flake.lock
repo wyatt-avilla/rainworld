@@ -55,6 +55,26 @@
         "type": "github"
       }
     },
+    "nix-checks": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1753764242,
+        "narHash": "sha256-dhoA9pnMppaCJO5tzNQaTDV9mQEaL9ijgSRRxDibYKY=",
+        "owner": "wyatt-avilla",
+        "repo": "nix-ci",
+        "rev": "9ef2f997abc1fa03c4e18de0dd3a35858dd9f5e8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "wyatt-avilla",
+        "repo": "nix-ci",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1729501122,
@@ -106,6 +126,7 @@
       "inputs": {
         "esp-dev": "esp-dev",
         "flake-utils": "flake-utils_2",
+        "nix-checks": "nix-checks",
         "nixpkgs": "nixpkgs_2",
         "rust-overlay": "rust-overlay"
       }
