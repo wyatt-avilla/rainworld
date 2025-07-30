@@ -2,22 +2,7 @@ use axum::Router;
 use axum::routing::get;
 use clap::Parser;
 
-/// Backend for rainworld
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-struct Args {
-    /// IP address for accompanying ESP32
-    #[arg(short, long)]
-    esp32_ip: String,
-
-    /// Port to run the server on
-    #[arg(short, long, default_value_t = shared::BACKEND_SERVER_PORT)]
-    port: u16,
-
-    /// Log level, one of (INFO, WARN, ERROR, DEBUG, TRACE)
-    #[arg(short, long, default_value_t = tracing::Level::INFO)]
-    log_level: tracing::Level,
-}
+mod arg_parse;
 
 async fn root_handler() -> &'static str {
     "Hello world"
@@ -25,17 +10,15 @@ async fn root_handler() -> &'static str {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let args = Args::parse();
+    let args = arg_parse::Args::parse();
 
     tracing_subscriber::fmt()
         .with_max_level(args.log_level)
         .init();
 
-    log::info!(
-        "Running server on port {}, expecting ESP32 at '{}'",
-        args.port,
-        args.esp32_ip
-    );
+    log::info!("Running server on port {}", args.port);
+    log::info!("Expecting ESP32 at '{}'", args.esp32_url);
+    log::info!("Expecting database at '{}'", args.influx_db_url);
 
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", args.port).as_str()).await?;
 
