@@ -18,38 +18,36 @@ let
     INFLUX_PORT="8086"
 
     mkdir -p "$INFLUX_DIR"
-    export INFLUXD_HTTP_BIND_ADDRESS=:$INFLUX_PORT
-    export INFLUXD_ENGINE_PATH=:$INFLUX_DIR/engine
-    export INFLUXD_CONFIG_PATH=:$INFLUX_DIR/config
 
-    export INFLUXDB_DATA_DIR=:$INFLUX_DIR/data
-    export INFLUXDB_DATA_WAL_DIR=:$INFLUX_DIR/wal
-    export INFLUXDB_META_DIR=:$INFLUX_DIR/meta
+    export INFLUXDB3_NODE_IDENTIFIER_PREFIX="rainworld_dev"
+    export INFLUXDB3_HTTP_BIND_ADDR="0.0.0.0:$INFLUX_PORT"
+    export INFLUXDB3_DB_DIR=$INFLUX_DIR/data
+    export INFLUXDB3_OBJECT_STORE="file"
 
-    echo "Starting InfluxDB on port $INFLUX_PORT..."
+    echo "Starting InfluxDB on $INFLUXDB3_HTTP_BIND_ADDR ..."
     echo "Using directory: $INFLUX_DIR"
 
-    if ${pkgs.influxdb}/bin/influx ping > /dev/null 2>&1; then
-        echo "InfluxDB is already running!"
+    ping_db() {
+        ${pkgs.lib.getExe pkgs.wget} -qO- "$INFLUXDB3_HTTP_BIND_ADDR"/ping > /dev/null 2>&1
+    }
+
+    if ping_db; then
+        echo "InfluxDB is already running"
         exit 0
     fi
 
-    nohup ${pkgs.influxdb}/bin/influxd > /dev/null 2>&1 &
+    nohup ${pkgs.lib.getExe pkgs.influxdb3} serve > /dev/null 2>&1 &
 
     INFLUX_PID=$!
     echo "InfluxDB started with PID $INFLUX_PID"
 
     echo "Waiting for InfluxDB to be ready..."
     for i in {1..30}; do
-    if ${pkgs.influxdb}/bin/influx ping > /dev/null 2>&1; then
-        echo "InfluxDB is ready!"
-
-        ${pkgs.influxdb}/bin/influx -execute "CREATE DATABASE plant_monitoring" 2>/dev/null || true
-        echo "Database 'plant_monitoring' ready"
-
-        break
-    fi
-    sleep 1
+      if ping_db; then
+          echo "InfluxDB is ready!"
+          break
+      fi
+      sleep 1
     done
 
     echo "InfluxDB is running at http://localhost:$INFLUX_PORT"
@@ -85,12 +83,16 @@ in
       nativeRustToolchain
       ++ (with pkgs; [
         rust-analyzer
-        influxdb2
-        influxdb2-cli
+        influxdb3
 
         influxStartScript
         influxStopScript
       ]);
+
+    buildInputs = with pkgs; [
+      pkg-config
+      openssl
+    ];
   };
 
   packages.backend =
