@@ -82,6 +82,8 @@ in
     nativeBuildInputs =
       nativeRustToolchain
       ++ (with pkgs; [
+        pkg-config
+        openssl
         rust-analyzer
         influxdb3
 
