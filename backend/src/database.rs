@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+
+use itertools::Itertools;
 use serde_json::json;
 use thiserror::Error;
 
@@ -64,6 +67,20 @@ impl Client {
             .map_err(DatabaseClientError::UrlParse)
     }
 
+    fn write_url(&self) -> Result<url::Url, DatabaseClientError> {
+        self.db_url
+            .join(
+                format!(
+                    "/{}/write_lp",
+                    DB_API_ENDPOINT
+                        .trim_start_matches('/')
+                        .trim_end_matches('/')
+                )
+                .as_str(),
+            )
+            .map_err(DatabaseClientError::UrlParse)
+    }
+
     pub async fn query(&self, influxql: &str) -> Result<reqwest::Response, DatabaseClientError> {
         let query_body = json!({
             "db": self.db_name,
@@ -73,6 +90,39 @@ impl Client {
         self.http_client
             .post(self.query_url()?)
             .json(&query_body)
+            .send()
+            .await
+            .map_err(DatabaseClientError::Http)
+    }
+
+    pub async fn write(
+        &self,
+        lines: Vec<(HashMap<String, String>, HashMap<String, String>, u64)>,
+    ) -> Result<reqwest::Response, DatabaseClientError> {
+        let tags_to_str =
+            |m: HashMap<String, String>| m.into_iter().map(|(k, v)| format!("{k}={v}")).join(",");
+
+        let fields_to_str = |m: HashMap<String, String>| {
+            m.into_iter().map(|(k, v)| format!("{k}=\"{v}\"")).join(",")
+        };
+
+        let line_protocol = lines
+            .into_iter()
+            .map(|(tags, fields, timestamp)| {
+                format!(
+                    "{},{} {} {}",
+                    self.db_name,
+                    tags_to_str(tags),
+                    fields_to_str(fields),
+                    timestamp
+                )
+            })
+            .join("\n");
+
+        self.http_client
+            .post(self.write_url()?)
+            .query(&[("db", self.db_name.clone())])
+            .body(line_protocol)
             .send()
             .await
             .map_err(DatabaseClientError::Http)

@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use axum::Router;
 use axum::routing::get;
 use clap::Parser;
@@ -26,6 +28,21 @@ async fn main() -> anyhow::Result<()> {
         &args.influxdb_url,
         &args.influxdb_auth_token_file,
     )?;
+
+    let test_write = client
+        .write(vec![(
+            HashMap::from([
+                ("tag1".to_string(), "tagval1".to_string()),
+                ("tag2".to_string(), "tagval2".to_string()),
+            ]),
+            HashMap::from([
+                ("field1".to_string(), "tagval1".to_string()),
+                ("field2".to_string(), "tagval2".to_string()),
+            ]),
+            1_641_024_000,
+        )])
+        .await;
+    dbg!(&test_write);
 
     let test_query = client
         .query(format!("SELECT * from {}", args.influxdb_database_name).as_str())
