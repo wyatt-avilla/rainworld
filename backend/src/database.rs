@@ -13,6 +13,9 @@ pub enum DatabaseClientError {
 
     #[error("Couldn't parse database url ({0})")]
     UrlParse(url::ParseError),
+
+    #[error("Error with HTTP request ({0})")]
+    Http(reqwest::Error),
 }
 
 pub struct Client {
@@ -61,16 +64,17 @@ impl Client {
             .map_err(DatabaseClientError::UrlParse)
     }
 
-    pub async fn query(&self, influxql: &str) -> Result<reqwest::Response, reqwest::Error> {
+    pub async fn query(&self, influxql: &str) -> Result<reqwest::Response, DatabaseClientError> {
         let query_body = json!({
             "db": self.db_name,
             "q": influxql
         });
 
         self.http_client
-            .post(self.query_url().unwrap())
+            .post(self.query_url()?)
             .json(&query_body)
             .send()
             .await
+            .map_err(DatabaseClientError::Http)
     }
 }
