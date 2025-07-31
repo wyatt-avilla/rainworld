@@ -23,7 +23,7 @@ fn validate_nonempty_readable_auth_file(s: &str) -> Result<String, String> {
             if file_contents.is_empty() {
                 Err(format!("'{s}' is an empty file"))
             } else {
-                Ok(file_contents)
+                Ok(file_contents.trim().to_string())
             }
         }
         Err(e) => Err(format!("Cannot read file '{s}': {e}")),
@@ -34,21 +34,25 @@ fn validate_nonempty_readable_auth_file(s: &str) -> Result<String, String> {
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Args {
+    /// Port to run the server on
+    #[arg(short, long, default_value_t = shared::BACKEND_SERVER_PORT)]
+    pub port: u16,
+
     /// URL for accompanying ESP32
     #[arg(short, long)]
     pub esp32_url: String,
 
     /// Url for ``InfluxDB``
     #[arg(short, long)]
-    pub influx_db_url: String,
+    pub influxdb_url: String,
 
-    /// Path to file containing (only) an ``InfluxDb`` auth token
+    /// Path to file containing (only) an ``InfluxDB`` auth token
     #[arg(short('a'), long, value_parser = validate_nonempty_readable_auth_file)]
-    pub influx_db_auth_token_file: String,
+    pub influxdb_auth_token_file: String,
 
-    /// Port to run the server on
-    #[arg(short, long, default_value_t = shared::BACKEND_SERVER_PORT)]
-    pub port: u16,
+    /// Name of the ``InfluxDB`` database
+    #[arg(short('t'), long, default_value_t = String::from("rainworld"))]
+    pub influxdb_database_name: String,
 
     /// Log level, one of (INFO, WARN, ERROR, DEBUG, TRACE)
     #[arg(short, long, default_value_t = tracing::Level::INFO)]
