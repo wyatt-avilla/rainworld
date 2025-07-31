@@ -82,8 +82,6 @@ in
     nativeBuildInputs =
       nativeRustToolchain
       ++ (with pkgs; [
-        pkg-config
-        openssl
         rust-analyzer
         influxdb3
 
@@ -107,6 +105,7 @@ in
       cargoLock = {
         lockFile = ../Cargo.lock;
       };
+      meta.mainProgram = "rainworld-backend";
       buildAndTestSubdir = "backend";
       src = ../.;
 
@@ -115,7 +114,16 @@ in
         cargo fmt --package ${backend} --check
       '';
 
-      nativeBuildInputs = nativeRustToolchain;
-      meta.mainProgram = "rainworld-backend";
+      nativeBuildInputs =
+        nativeRustToolchain
+        ++ (with pkgs; [
+          pkg-config
+          openssl
+        ]);
+
+      buildInputs = with pkgs; [
+        pkg-config
+        openssl
+      ];
     };
 }
