@@ -3,6 +3,7 @@ use axum::routing::get;
 use clap::Parser;
 
 mod arg_parse;
+mod database;
 
 async fn root_handler() -> &'static str {
     "Hello world"
