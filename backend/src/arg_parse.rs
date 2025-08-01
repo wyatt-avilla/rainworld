@@ -35,7 +35,7 @@ fn validate_nonempty_readable_auth_file(s: &str) -> Result<String, String> {
 #[command(version, about, long_about = None)]
 pub struct Args {
     /// Port to run the server on
-    #[arg(short, long, default_value_t = shared::BACKEND_SERVER_PORT)]
+    #[arg(short, long, default_value_t = shared::backend::DEFAULT_SERVER_PORT)]
     pub port: u16,
 
     /// URL for accompanying ESP32

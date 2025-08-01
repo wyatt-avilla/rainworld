@@ -1,1 +1,1 @@
-pub static BACKEND_SERVER_PORT: u16 = 8877;
+pub const DEFAULT_SERVER_PORT: u16 = 8877;
