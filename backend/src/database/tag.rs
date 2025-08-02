@@ -26,3 +26,10 @@ impl Tag {
         ]
     }
 }
+
+impl super::line_protocol::LineProtocolElement for Tag {
+    fn serialize(&self) -> String {
+        let esc = super::line_protocol::LineProtocol::escape;
+        format!("{}={}", esc(&self.key), esc(&self.value))
+    }
+}
