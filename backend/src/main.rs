@@ -1,11 +1,11 @@
-use std::collections::HashMap;
-
 use axum::Router;
 use axum::routing::get;
 use clap::Parser;
+use hardware::HardwareInterface;
 
 mod arg_parse;
 mod database;
+mod hardware;
 
 async fn root_handler() -> &'static str {
     "Hello world"
@@ -22,6 +22,8 @@ async fn main() -> anyhow::Result<()> {
     log::info!("Running server on port {}", args.port);
     log::info!("Expecting ESP32 at '{}'", args.esp32_url);
     log::info!("Expecting database at '{}'", args.influxdb_url);
+
+    let hardware = HardwareInterface::new(&args.esp32_url);
 
     let client = database::Client::new(
         &args.influxdb_database_name,
