@@ -112,6 +112,7 @@ in
       checkPhase = ''
         cargo clippy --package ${backend} --all-features -- -W clippy::pedantic -D warnings
         cargo fmt --package ${backend} --check
+        cargo test --package ${backend}
       '';
 
       nativeBuildInputs =
