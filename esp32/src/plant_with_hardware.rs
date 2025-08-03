@@ -1,4 +1,4 @@
-use shared::{Plant, PlantStatus};
+use shared::esp32::{Plant, PlantStatus};
 
 use crate::sensors::AnyMoistureSensor;
 
@@ -21,7 +21,7 @@ impl<'a> PlantWithHardware<'a> {
             moisture_level: self
                 .moisture_sensor
                 .read()
-                .map_err(|_| shared::Esp32Error::SensorError),
+                .map_err(|_| shared::esp32::Esp32Error::SensorError),
         }
     }
 }
