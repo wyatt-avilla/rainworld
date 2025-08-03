@@ -1,15 +1,13 @@
+use serde::Serialize;
 use thiserror::Error;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Serialize)]
 pub enum HardwareInterfaceError {
-    #[error("Couldn't build http request ({0})")]
-    HttpRequestBuild(reqwest::Error),
-
     #[error("Couldn't send GET request ({0})")]
-    HttpRequestGet(reqwest::Error),
+    HttpRequestGet(String),
 
     #[error("Couldn't deserialize response ({0})")]
-    DeserializeError(reqwest::Error),
+    DeserializeError(String),
 }
 
 pub struct HardwareInterface {
@@ -26,18 +24,13 @@ impl HardwareInterface {
     }
 
     pub async fn get_reading(&self) -> Result<shared::esp32::APIResponse, HardwareInterfaceError> {
-        let request = self
-            .http_client
-            .get(&self.read_moisture_url)
-            .build()
-            .map_err(HardwareInterfaceError::HttpRequestBuild)?;
-
         self.http_client
-            .execute(request)
+            .get(&self.read_moisture_url)
+            .send()
             .await
-            .map_err(HardwareInterfaceError::HttpRequestGet)?
+            .map_err(|e| HardwareInterfaceError::HttpRequestGet(e.to_string()))?
             .json::<shared::esp32::APIResponse>()
             .await
-            .map_err(HardwareInterfaceError::DeserializeError)
+            .map_err(|e| HardwareInterfaceError::DeserializeError(e.to_string()))
     }
 }

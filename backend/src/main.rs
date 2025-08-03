@@ -1,11 +1,24 @@
-use axum::Router;
+use std::sync::Arc;
+
+use axum::extract::State;
 use axum::routing::get;
+use axum::{Json, Router};
 use clap::Parser;
-use hardware::HardwareInterface;
+use hardware::{HardwareInterface, HardwareInterfaceError};
 
 mod arg_parse;
 mod database;
 mod hardware;
+
+async fn get_reading_handle(
+    State(state): State<Arc<HardwareInterface>>,
+) -> Json<Result<shared::esp32::APIResponse, HardwareInterfaceError>> {
+    let reading = state.get_reading().await;
+    if let Err(e) = &reading {
+        log::error!("Error while trying to get reading ({e})");
+    }
+    Json(reading)
+}
 
 async fn root_handler() -> &'static str {
     "Hello world"
@@ -19,41 +32,28 @@ async fn main() -> anyhow::Result<()> {
         .with_max_level(args.log_level)
         .init();
 
-    log::info!("Running server on port {}", args.port);
-    log::info!("Expecting ESP32 at '{}'", args.esp32_url);
-    log::info!("Expecting database at '{}'", args.influxdb_url);
+    let hardware_interface = Arc::new(HardwareInterface::new(&args.esp32_url));
 
-    let hardware = HardwareInterface::new(&args.esp32_url);
-
-    let client = database::Client::new(
+    let db_client = Arc::new(database::Client::new(
         &args.influxdb_database_name,
         &args.influxdb_url,
         &args.influxdb_auth_token_file,
-    )?;
-
-    let test_write = client
-        .write(vec![(
-            HashMap::from([
-                ("tag1".to_string(), "tagval1".to_string()),
-                ("tag2".to_string(), "tagval2".to_string()),
-            ]),
-            HashMap::from([
-                ("field1".to_string(), "tagval1".to_string()),
-                ("field2".to_string(), "tagval2".to_string()),
-            ]),
-            1_641_024_000,
-        )])
-        .await;
-    dbg!(&test_write);
-
-    let test_query = client
-        .query(format!("SELECT * from {}", args.influxdb_database_name).as_str())
-        .await;
-    dbg!(&test_query);
+    )?);
 
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", args.port).as_str()).await?;
 
-    let app = Router::new().route("/", get(root_handler));
+    let app = Router::new()
+        .route("/", get(root_handler))
+        .route(
+            shared::backend::READING_NOW_ENDPOINT,
+            get(get_reading_handle),
+        )
+        .with_state(hardware_interface)
+        .with_state(db_client);
+
+    log::info!("Running server on port {}", args.port);
+    log::info!("Expecting ESP32 at '{}'", args.esp32_url);
+    log::info!("Expecting database at '{}'", args.influxdb_url);
 
     axum::serve(listener, app).await?;
 
