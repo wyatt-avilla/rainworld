@@ -1,3 +1,5 @@
+#![allow(dead_code)] // TODO: remove this
+
 use std::sync::Arc;
 
 use axum::extract::State;
