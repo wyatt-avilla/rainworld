@@ -7,6 +7,7 @@ use axum::routing::get;
 use axum::{Json, Router};
 use clap::Parser;
 use hardware::{HardwareInterface, HardwareInterfaceError};
+use serde_json::{Value, json};
 
 mod arg_parse;
 mod database;
@@ -22,8 +23,12 @@ async fn get_reading_handler(
     Json(reading)
 }
 
-async fn root_handler() -> &'static str {
-    "Hello world"
+async fn root_handler() -> Json<Value> {
+    let j = json!({
+        "message": "hello world"
+    });
+
+    axum::Json(j)
 }
 
 #[tokio::main]
