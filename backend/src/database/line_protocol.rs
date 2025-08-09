@@ -60,7 +60,7 @@ impl LineProtocol {
             .collect()
     }
 
-    pub fn to_influx_string(&self, timestamp: u64) -> String {
+    pub fn to_influx_string(&self) -> String {
         format!(
             "{},{} {} {}",
             self.table,
@@ -72,7 +72,7 @@ impl LineProtocol {
                 .iter()
                 .map(LineProtocolElement::serialize)
                 .join(","),
-            timestamp,
+            self.timestamp,
         )
     }
 }
@@ -97,7 +97,7 @@ mod tests {
         let line = LineProtocol::new(table_name, tags.into_iter(), fields.into_iter(), timestamp);
 
         assert_eq!(
-            line.to_influx_string(timestamp),
+            line.to_influx_string(),
             format!("fake_table_name,tag_key_1=tag_val_1 field_key_1=\"field_val_1\" {timestamp}")
         );
     }
