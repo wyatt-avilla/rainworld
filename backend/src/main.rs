@@ -12,7 +12,7 @@ mod arg_parse;
 mod database;
 mod hardware;
 
-async fn get_reading_handle(
+async fn get_reading_handler(
     State(state): State<Arc<HardwareInterface>>,
 ) -> Json<Result<shared::esp32::APIResponse, HardwareInterfaceError>> {
     let reading = state.get_reading().await;
@@ -48,7 +48,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/", get(root_handler))
         .route(
             shared::backend::READING_NOW_ENDPOINT,
-            get(get_reading_handle),
+            get(get_reading_handler),
         )
         .with_state(hardware_interface)
         .with_state(db_client);
