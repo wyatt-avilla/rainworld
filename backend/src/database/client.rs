@@ -17,6 +17,9 @@ pub enum DatabaseClientError {
 
     #[error("Error with HTTP request ({0})")]
     Http(reqwest::Error),
+
+    #[error("Couldn't write data ({0})")]
+    Write(reqwest::Error),
 }
 
 pub struct Client {
@@ -96,12 +99,8 @@ impl Client {
     pub async fn write(
         &self,
         lines: Vec<super::line_protocol::LineProtocol>,
-        timestamp: u64,
-    ) -> Result<reqwest::Response, DatabaseClientError> {
-        let serialized_lines = lines
-            .into_iter()
-            .map(|l| l.to_influx_string(timestamp))
-            .join(",");
+    ) -> Result<(), DatabaseClientError> {
+        let serialized_lines = lines.into_iter().map(|l| l.to_influx_string()).join(",");
 
         self.http_client
             .post(self.write_url()?)
@@ -109,6 +108,10 @@ impl Client {
             .body(serialized_lines)
             .send()
             .await
-            .map_err(DatabaseClientError::Http)
+            .map_err(DatabaseClientError::Http)?
+            .error_for_status()
+            .map_err(DatabaseClientError::Write)?;
+
+        Ok(())
     }
 }
