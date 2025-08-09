@@ -14,9 +14,9 @@ mod database;
 mod hardware;
 
 async fn get_reading_handler(
-    State(state): State<Arc<HardwareInterface>>,
+    State(hardware): State<Arc<HardwareInterface>>,
 ) -> Json<Result<shared::esp32::APIResponse, HardwareInterfaceError>> {
-    let reading = state.get_reading().await;
+    let reading = hardware.get_reading().await;
     if let Err(e) = &reading {
         log::error!("Error while trying to get reading ({e})");
     }
