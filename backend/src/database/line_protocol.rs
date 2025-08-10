@@ -1,17 +1,11 @@
 use super::field::Field;
 use super::tag::Tag;
 use itertools::Itertools;
+use shared::plant::PlantWithReadings;
 use std::collections::HashSet;
-use thiserror::Error;
 
 pub trait LineProtocolElement {
     fn serialize(&self) -> String;
-}
-
-#[derive(Error, Debug)]
-pub enum LineProtocolError {
-    #[error("Malformed sensor data ({0})")]
-    Sensor(shared::esp32::Esp32Error),
 }
 
 pub struct LineProtocol {
@@ -42,18 +36,16 @@ impl LineProtocol {
 
     pub fn from(
         table_name: &str,
-        plant_statuses: &shared::esp32::APIResponse,
+        plants_with_readings: Vec<PlantWithReadings>,
         timestamp: u64,
-    ) -> Result<Vec<Self>, LineProtocolError> {
-        plant_statuses
+    ) -> Result<Vec<Self>, shared::esp32::Error> {
+        plants_with_readings
             .iter()
-            .map(|status| {
+            .map(|plant_with_readings| {
                 Ok(LineProtocol::new(
                     table_name,
-                    Tag::vec_from(&status.plant).into_iter(),
-                    Field::vec_from(status)
-                        .map_err(LineProtocolError::Sensor)?
-                        .into_iter(),
+                    Tag::vec_from(&plant_with_readings.plant).into_iter(),
+                    Field::vec_from(&plant_with_readings.readings).into_iter(),
                     timestamp,
                 ))
             })

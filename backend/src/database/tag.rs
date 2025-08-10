@@ -18,7 +18,7 @@ impl Tag {
         }
     }
 
-    pub fn vec_from(plant: &shared::esp32::Plant) -> Vec<Self> {
+    pub fn vec_from(plant: &shared::plant::Plant) -> Vec<Self> {
         vec![
             Self::new(strs::ID, &plant.id.to_string()),
             Self::new(strs::NAME, &plant.name),

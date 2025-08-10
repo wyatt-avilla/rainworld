@@ -17,7 +17,7 @@ const TABLE_NAME: &str = "rainworld_readings";
 
 async fn get_reading_handler(
     State(hardware): State<Arc<HardwareInterface>>,
-) -> Json<Result<shared::esp32::APIResponse, HardwareInterfaceError>> {
+) -> Json<Result<shared::esp32::Response, HardwareInterfaceError>> {
     let reading = hardware.get_reading().await;
     if let Err(e) = &reading {
         log::error!("Error while trying to get reading ({e})");

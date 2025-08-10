@@ -6,10 +6,13 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum IntervalReadingError {
     #[error("Couldn't read sensors ({0})")]
-    SensorReading(HardwareInterfaceError),
+    SensorReading(shared::esp32::Error),
 
-    #[error("Couldn't convert reading into LineProtocol ({0})")]
-    Serialization(database::LineProtocolError),
+    #[error("Couldn't send request to hardware ({0})")]
+    HardwareContact(HardwareInterfaceError),
+
+    #[error("Couldn't convert reading into LineProtocol")]
+    Serialization,
 
     #[error("Couldn't write to database ({0})")]
     Write(database::DatabaseClientError),
@@ -23,6 +26,9 @@ pub async fn read_sensor_and_store(
     let reading = hardware
         .get_reading()
         .await
+        .map_err(IntervalReadingError::HardwareContact)?
+        .into_iter()
+        .collect::<Result<Vec<shared::plant::PlantWithReadings>, _>>()
         .map_err(IntervalReadingError::SensorReading)?;
 
     let timestamp = std::time::SystemTime::now()
@@ -30,8 +36,8 @@ pub async fn read_sensor_and_store(
         .unwrap()
         .as_secs();
 
-    let line_protocols = database::LineProtocol::from(table_name, &reading, timestamp)
-        .map_err(IntervalReadingError::Serialization)?;
+    let line_protocols = database::LineProtocol::from(table_name, reading, timestamp)
+        .map_err(|_| IntervalReadingError::Serialization)?;
 
     database
         .write(line_protocols)

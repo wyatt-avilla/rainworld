@@ -16,13 +16,11 @@ impl Field {
         }
     }
 
-    pub fn vec_from(
-        status: &shared::esp32::PlantStatus,
-    ) -> Result<Vec<Self>, shared::esp32::Esp32Error> {
-        Ok(vec![Self::new(
+    pub fn vec_from(readings: &shared::plant::Readings) -> Vec<Self> {
+        vec![Self::new(
             strs::MOISTURE_LEVEL,
-            FieldValue::UInteger16(status.moisture_level.clone()?),
-        )])
+            FieldValue::UInteger16(readings.moisture_level),
+        )]
     }
 }
 

@@ -23,13 +23,13 @@ impl HardwareInterface {
         }
     }
 
-    pub async fn get_reading(&self) -> Result<shared::esp32::APIResponse, HardwareInterfaceError> {
+    pub async fn get_reading(&self) -> Result<shared::esp32::Response, HardwareInterfaceError> {
         self.http_client
             .get(&self.read_moisture_url)
             .send()
             .await
             .map_err(|e| HardwareInterfaceError::HttpRequestGet(e.to_string()))?
-            .json::<shared::esp32::APIResponse>()
+            .json::<shared::esp32::Response>()
             .await
             .map_err(|e| HardwareInterfaceError::DeserializeError(e.to_string()))
     }
