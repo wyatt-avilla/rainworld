@@ -100,7 +100,7 @@ impl Client {
         &self,
         lines: Vec<super::line_protocol::LineProtocol>,
     ) -> Result<(), DatabaseClientError> {
-        let serialized_lines = lines.into_iter().map(|l| l.to_influx_string()).join(",");
+        let serialized_lines = lines.into_iter().map(|l| l.to_influx_string()).join("\n");
 
         self.http_client
             .post(self.write_url()?)
