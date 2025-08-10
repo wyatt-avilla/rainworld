@@ -21,7 +21,7 @@ fn get_handler(
     plants_with_hardware: Arc<Vec<PlantWithHardware<'_>>>,
 ) -> impl Fn(Request<&mut EspHttpConnection<'_>>) -> Result<(), EspIOError> + use<'_> {
     let handler = move |request: Request<&mut EspHttpConnection<'_>>| -> Result<(), EspIOError> {
-        let statuses: shared::esp32::APIResponse = plants_with_hardware
+        let statuses: shared::esp32::Response = plants_with_hardware
             .iter()
             .map(PlantWithHardware::status)
             .collect();
@@ -55,7 +55,7 @@ pub fn new_server(
 
     server
         .fn_handler(
-            shared::esp32::ESP32_ENDPOINT,
+            shared::esp32::READ_ENDPOINT,
             Method::Get,
             get_handler(plants_clone),
         )

@@ -3,7 +3,7 @@ use esp_idf_hal::{
     gpio::Pins,
     sys::EspError,
 };
-use shared::esp32::{Plant, ScientificPlantName};
+use shared::plant::{Plant, ScientificPlantName};
 
 use crate::plant_with_hardware::PlantWithHardware;
 use crate::sensors::{AnyMoistureSensor, MoistureSensor};

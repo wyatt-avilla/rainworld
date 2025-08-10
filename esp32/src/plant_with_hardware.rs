@@ -1,4 +1,4 @@
-use shared::esp32::{Plant, PlantStatus};
+use shared::plant::{Plant, PlantWithReadings, Readings};
 
 use crate::sensors::AnyMoistureSensor;
 
@@ -15,13 +15,15 @@ impl<'a> PlantWithHardware<'a> {
         }
     }
 
-    pub fn status(&self) -> PlantStatus {
-        PlantStatus {
+    pub fn status(&self) -> Result<PlantWithReadings, shared::esp32::Error> {
+        let moisture_level = self
+            .moisture_sensor
+            .read()
+            .map_err(|_| shared::esp32::Error::Moisture)?;
+
+        Ok(PlantWithReadings {
             plant: self.plant.clone(),
-            moisture_level: self
-                .moisture_sensor
-                .read()
-                .map_err(|_| shared::esp32::Esp32Error::SensorError),
-        }
+            readings: Readings { moisture_level },
+        })
     }
 }
