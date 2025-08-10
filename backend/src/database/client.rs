@@ -1,25 +1,27 @@
 use itertools::Itertools;
+use reqwest::header::InvalidHeaderValue;
+use serde::Serialize;
 use serde_json::json;
 use thiserror::Error;
 
 static DB_API_ENDPOINT: &str = "/api/v3/";
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Serialize)]
 pub enum DatabaseClientError {
     #[error("Couldn't initialize http client ({0})")]
-    HttpClientInit(reqwest::Error),
+    HttpClientInit(String),
 
     #[error("Couldn't parse authorization token into header ({0})")]
-    AuthorizationParse(reqwest::header::InvalidHeaderValue),
+    AuthorizationParse(String),
 
     #[error("Couldn't parse database url ({0})")]
-    UrlParse(url::ParseError),
+    UrlParse(String),
 
     #[error("Error with HTTP request ({0})")]
-    Http(reqwest::Error),
+    Http(String),
 
     #[error("Couldn't write data ({0})")]
-    Write(reqwest::Error),
+    Write(String),
 }
 
 pub struct Client {
@@ -41,16 +43,19 @@ impl Client {
             reqwest::header::AUTHORIZATION,
             format!("Bearer {auth_token}")
                 .parse()
-                .map_err(DatabaseClientError::AuthorizationParse)?,
+                .map_err(|e: InvalidHeaderValue| {
+                    DatabaseClientError::AuthorizationParse(e.to_string())
+                })?,
         );
 
         Ok(Client {
             db_name: database_name.to_string(),
-            db_url: url::Url::parse(database_url).map_err(DatabaseClientError::UrlParse)?,
+            db_url: url::Url::parse(database_url)
+                .map_err(|e| DatabaseClientError::UrlParse(e.to_string()))?,
             http_client: reqwest::Client::builder()
                 .default_headers(headers)
                 .build()
-                .map_err(DatabaseClientError::HttpClientInit)?,
+                .map_err(|e| DatabaseClientError::HttpClientInit(e.to_string()))?,
         })
     }
 
@@ -65,7 +70,7 @@ impl Client {
                 )
                 .as_str(),
             )
-            .map_err(DatabaseClientError::UrlParse)
+            .map_err(|e| DatabaseClientError::UrlParse(e.to_string()))
     }
 
     fn write_url(&self) -> Result<url::Url, DatabaseClientError> {
@@ -79,7 +84,7 @@ impl Client {
                 )
                 .as_str(),
             )
-            .map_err(DatabaseClientError::UrlParse)
+            .map_err(|e| DatabaseClientError::UrlParse(e.to_string()))
     }
 
     pub async fn query(&self, influxql: &str) -> Result<reqwest::Response, DatabaseClientError> {
@@ -93,7 +98,7 @@ impl Client {
             .json(&query_body)
             .send()
             .await
-            .map_err(DatabaseClientError::Http)
+            .map_err(|e| DatabaseClientError::Http(e.to_string()))
     }
 
     pub async fn write(
@@ -108,9 +113,9 @@ impl Client {
             .body(serialized_lines)
             .send()
             .await
-            .map_err(DatabaseClientError::Http)?
+            .map_err(|e| DatabaseClientError::Http(e.to_string()))?
             .error_for_status()
-            .map_err(DatabaseClientError::Write)?;
+            .map_err(|e| DatabaseClientError::Write(e.to_string()))?;
 
         Ok(())
     }
