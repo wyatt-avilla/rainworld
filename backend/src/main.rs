@@ -1,5 +1,3 @@
-#![allow(dead_code)] // TODO: remove this
-
 use std::sync::Arc;
 
 use axum::extract::State;
@@ -7,11 +5,15 @@ use axum::routing::get;
 use axum::{Json, Router};
 use clap::Parser;
 use hardware::{HardwareInterface, HardwareInterfaceError};
+use interval_readings::read_sensor_and_store_every_n_seconds;
 use serde_json::{Value, json};
 
 mod arg_parse;
 mod database;
 mod hardware;
+mod interval_readings;
+
+const TABLE_NAME: &str = "rainworld_readings";
 
 async fn get_reading_handler(
     State(hardware): State<Arc<HardwareInterface>>,
@@ -42,7 +44,7 @@ async fn main() -> anyhow::Result<()> {
     let hardware_interface = Arc::new(HardwareInterface::new(&args.esp32_url));
 
     let db_client = Arc::new(database::Client::new(
-        &args.influxdb_database_name,
+        &args.influxdb_database_name.clone(),
         &args.influxdb_url,
         &args.influxdb_auth_token_file,
     )?);
@@ -55,12 +57,19 @@ async fn main() -> anyhow::Result<()> {
             shared::backend::READING_NOW_ENDPOINT,
             get(get_reading_handler),
         )
-        .with_state(hardware_interface)
-        .with_state(db_client);
+        .with_state(hardware_interface.clone())
+        .with_state(db_client.clone());
 
     log::info!("Running server on port {}", args.port);
     log::info!("Expecting ESP32 at '{}'", args.esp32_url);
     log::info!("Expecting database at '{}'", args.influxdb_url);
+
+    tokio::spawn(read_sensor_and_store_every_n_seconds(
+        hardware_interface,
+        db_client,
+        TABLE_NAME.to_string(),
+        args.reading_interval_seconds,
+    ));
 
     axum::serve(listener, app).await?;
 

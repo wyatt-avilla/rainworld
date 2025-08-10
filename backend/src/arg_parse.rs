@@ -54,6 +54,10 @@ pub struct Args {
     #[arg(short('t'), long, default_value_t = String::from("rainworld"))]
     pub influxdb_database_name: String,
 
+    /// Interval (in seconds) between sensor readings
+    #[arg(short, long, default_value_t = 300)]
+    pub reading_interval_seconds: u64,
+
     /// Log level, one of (INFO, WARN, ERROR, DEBUG, TRACE)
     #[arg(short, long, default_value_t = tracing::Level::INFO)]
     pub log_level: tracing::Level,
