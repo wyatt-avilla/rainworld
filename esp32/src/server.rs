@@ -48,8 +48,11 @@ fn get_handler(
 pub fn new_server(
     plants_with_hardware: &Arc<Vec<PlantWithHardware<'static>>>,
 ) -> Result<EspHttpServer<'static>, ServerCreationError> {
-    let mut server =
-        EspHttpServer::new(&Configuration::default()).map_err(ServerCreationError::Init)?;
+    let mut server = EspHttpServer::new(&Configuration {
+        stack_size: 10000,
+        ..Configuration::default()
+    })
+    .map_err(ServerCreationError::Init)?;
 
     let plants_clone = plants_with_hardware.clone();
 

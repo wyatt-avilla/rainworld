@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt::Display, time::SystemTime};
 
 use serde::{Deserialize, Serialize};
 
@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 pub struct PlantWithReadings {
     pub plant: Plant,
     pub readings: Readings,
+    pub time: SystemTime,
 }
 
 #[derive(Serialize, Deserialize, Clone)]

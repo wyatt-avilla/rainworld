@@ -9,6 +9,7 @@ mod config;
 mod plant_with_hardware;
 mod sensors;
 mod server;
+mod time;
 mod wifi;
 
 #[embassy_executor::main]
@@ -38,6 +39,8 @@ async fn main(spawner: Spawner) {
         "Device ip: {}",
         wifi.wifi().ap_netif().get_ip_info().unwrap().ip
     );
+
+    let _sntp = time::sync().await.unwrap();
 
     let plants_with_hardware = std::sync::Arc::new(
         config::plant_hardware_associations(static_adc, peripherals.pins).unwrap(),

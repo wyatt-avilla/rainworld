@@ -24,6 +24,7 @@ impl<'a> PlantWithHardware<'a> {
         Ok(PlantWithReadings {
             plant: self.plant.clone(),
             readings: Readings { moisture_level },
+            time: std::time::SystemTime::now(),
         })
     }
 }

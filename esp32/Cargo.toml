@@ -18,7 +18,7 @@ shared = { path = "../shared" }
 log = "0.4"
 esp-idf-svc = { version = "0.51", features = ["embassy-time-driver", "embassy-sync"] }
 critical-section = { version = "1.1", features = ["std"], default-features = false }
-embassy-executor = { version = "0.7", features = ["executor-thread", "arch-std", "task-arena-size-8192"] }
+embassy-executor = { version = "0.7", features = ["executor-thread", "arch-std", "task-arena-size-16384"] }
 embassy-time = { version = "0.4.0" }
 esp-idf-hal = "0.45.2"
 dotenvy_macro = "0.15.7"
