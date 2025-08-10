@@ -51,7 +51,7 @@ pub struct Args {
     pub influxdb_auth_token_file: String,
 
     /// Name of the ``InfluxDB`` database
-    #[arg(short('t'), long, default_value_t = String::from("rainworld"))]
+    #[arg(short('d'), long, default_value_t = String::from("rainworld"))]
     pub influxdb_database_name: String,
 
     /// Interval (in seconds) between sensor readings
