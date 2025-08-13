@@ -1,6 +1,5 @@
 use itertools::Itertools;
 use reqwest::header::InvalidHeaderValue;
-use serde::Serialize;
 use serde_json::json;
 use thiserror::Error;
 
@@ -24,7 +23,7 @@ pub enum DatabaseClientError {
     Write(reqwest::Error),
 
     #[error("Couldn't deserialize data ({0})")]
-    Deserialize(reqwest::Error),
+    Deserialize(String),
 }
 
 pub struct Client {
@@ -93,18 +92,23 @@ impl Client {
     ) -> Result<Vec<shared::plant::PlantWithReadings>, DatabaseClientError> {
         let query_body = json!({
             "db": self.db_name,
-            "q": influxql
+            "q": influxql,
+            "time_format": "rfc3339",
         });
 
-        let resp = self
-            .http_client
+        self.http_client
             .post(self.query_url()?)
             .json(&query_body)
             .send()
             .await
-            .map_err(DatabaseClientError::Http)?;
-
-        Self::deserialize_db_resp(resp).await
+            .map_err(DatabaseClientError::Http)?
+            .json::<Vec<super::response::InfluxResponse>>()
+            .await
+            .map_err(|e| DatabaseClientError::Deserialize(e.to_string()))?
+            .into_iter()
+            .map(std::convert::TryInto::try_into)
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(DatabaseClientError::Deserialize)
     }
 
     pub async fn write(

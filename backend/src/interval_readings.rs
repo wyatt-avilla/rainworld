@@ -31,12 +31,7 @@ pub async fn read_sensor_and_store(
         .collect::<Result<Vec<shared::plant::PlantWithReadings>, _>>()
         .map_err(IntervalReadingError::SensorReading)?;
 
-    let timestamp = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
-        .as_secs();
-
-    let line_protocols = database::LineProtocol::from(table_name, reading, timestamp)
+    let line_protocols = database::LineProtocol::from(table_name, &reading)
         .map_err(|_| IntervalReadingError::Serialization)?;
 
     database

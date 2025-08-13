@@ -4,6 +4,7 @@ use axum::extract::State;
 use axum::routing::get;
 use axum::{Json, Router};
 use clap::Parser;
+use database::DatabaseClientError;
 use hardware::{HardwareInterface, HardwareInterfaceError};
 use interval_readings::read_sensor_and_store_every_n_seconds;
 use serde_json::{Value, json};
@@ -23,6 +24,26 @@ async fn get_reading_handler(
         log::error!("Error while trying to get reading ({e})");
     }
     Json(reading)
+}
+
+async fn read_entire_table(
+    State(db): State<Arc<database::Client>>,
+) -> Json<shared::backend::Response> {
+    let resp = db
+        .query(format!("select * from {TABLE_NAME}").as_str())
+        .await;
+
+    if let Err(e) = &resp {
+        log::error!("Error while trying to get reading ({e})");
+    }
+
+    let resp = resp.map_err(|e| match e {
+        DatabaseClientError::Http(_) => shared::backend::Error::Http,
+        DatabaseClientError::Deserialize(_) => shared::backend::Error::Deserialize,
+        _ => shared::backend::Error::Internal,
+    });
+
+    Json(resp)
 }
 
 async fn root_handler() -> Json<Value> {
@@ -58,6 +79,7 @@ async fn main() -> anyhow::Result<()> {
             get(get_reading_handler),
         )
         .with_state(hardware_interface.clone())
+        .route("/api/read_table", get(read_entire_table))
         .with_state(db_client.clone());
 
     log::info!("Running server on port {}", args.port);

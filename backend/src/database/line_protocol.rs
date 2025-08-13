@@ -36,8 +36,7 @@ impl LineProtocol {
 
     pub fn from(
         table_name: &str,
-        plants_with_readings: Vec<PlantWithReadings>,
-        timestamp: u64,
+        plants_with_readings: &[PlantWithReadings],
     ) -> Result<Vec<Self>, shared::esp32::Error> {
         plants_with_readings
             .iter()
@@ -46,7 +45,11 @@ impl LineProtocol {
                     table_name,
                     Tag::vec_from(&plant_with_readings.plant).into_iter(),
                     Field::vec_from(&plant_with_readings.readings).into_iter(),
-                    timestamp,
+                    plant_with_readings
+                        .time
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .unwrap()
+                        .as_secs(),
                 ))
             })
             .collect()

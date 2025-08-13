@@ -33,6 +33,7 @@ impl super::line_protocol::LineProtocolElement for Field {
 #[derive(Hash, Eq, PartialEq)]
 pub enum FieldValue {
     UInteger16(u16),
+    #[allow(dead_code)]
     String(String),
 }
 
