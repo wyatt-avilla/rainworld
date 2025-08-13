@@ -100,7 +100,7 @@ let
 
     selfDeps = pkgs.rustPlatform.fetchCargoVendor {
       src = ../.;
-      hash = "sha256-0Wn6cakpoluudjs40eC/vYoBvO7qtT2m6FY0XN3WqDM=";
+      hash = "sha256-Jw4fBgRawnxZLeTX089acIoOqjTJj8ywfYEwEOUAPKY=";
     };
 
     buildPhase = ''
