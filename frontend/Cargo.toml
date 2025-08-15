@@ -10,4 +10,5 @@ crate-type = ["cdylib"]
 console_error_panic_hook = "0.1.7"
 gloo-console = "0.3.0"
 leptos = "0.8.6"
+stylers = "0.3.2"
 wasm-bindgen = "0.2.100"

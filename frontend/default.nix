@@ -3,7 +3,7 @@ let
   wasmTarget = "wasm32-unknown-unknown";
 
   nativeRustToolchain = with pkgs; [
-    (rust-bin.stable.latest.default.override {
+    (rust-bin.nightly.latest.default.override {
       extensions = [
         "clippy"
         "rust-src"
@@ -39,6 +39,7 @@ in
 
       buildPhase = ''
         cargo build -j $(nproc) -p ${frontend} --offline --release --target=${wasmTarget}
+        mv target/stylers target/stylers-release
       '';
 
       checkPhase = ''
@@ -63,6 +64,8 @@ in
         -o $out/${frontend}_bg.wasm \
         -Oz
 
+        cp target/stylers-release/main.css $out/
+
         cat > $out/index.html << 'EOF'
         <!DOCTYPE html>
         <html>
@@ -70,6 +73,7 @@ in
           <meta charset="utf-8">
           <title>Leptos App</title>
           <link rel="modulepreload" href="/${frontend}.js">
+          <link rel="stylesheet" href="/main.css">
         </head>
         <body>
           <script type="module">
@@ -78,7 +82,6 @@ in
           </script>
         </body>
         </html>
-        EOF
       '';
 
       nativeBuildInputs = nativeRustToolchain ++ (with pkgs; [ ]);

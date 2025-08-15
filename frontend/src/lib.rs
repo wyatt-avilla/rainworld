@@ -1,17 +1,30 @@
 use gloo_console as console;
 use leptos::prelude::*;
+use stylers::style;
 use wasm_bindgen::prelude::*;
 
 #[component]
 fn App() -> impl IntoView {
+    let styler_class = style! { "App",
+        div {
+            border: 1px solid black;
+            margin: 25px 50px 75px 100px;
+            background-color: lightblue;
+        }
+
+        div.one {
+            color: red;
+        }
+    };
+
     let panic_handler = move |_| {
         panic!("Test panic from Leptos button click!");
     };
 
     let log_handler = move |_| console::log!("Hello console");
 
-    view! {
-        <div>
+    view! { class = styler_class,
+        <div class="one">
           <h1>"Hello Leptos!"</h1>
           <button on:click=panic_handler>
             "Click to Panic!"
