@@ -40,10 +40,11 @@
         };
 
         backendOutputs = import ./backend { inherit self pkgs system; };
+        frontendOutputs = import ./frontend { inherit self pkgs system; };
       in
       {
-        devShells = esp32Outputs.devShells // backendOutputs.devShells;
-        packages = esp32Outputs.packages // backendOutputs.packages;
+        devShells = esp32Outputs.devShells // backendOutputs.devShells // frontendOutputs.devShells;
+        packages = esp32Outputs.packages // backendOutputs.packages // frontendOutputs.packages;
         checks = {
           formatting = nix-checks.lib.mkFormattingCheck {
             inherit pkgs;
