@@ -66,7 +66,7 @@ in
 
         cp target/stylers-release/main.css $out/
 
-        cat > $out/index.html << 'EOF'
+        cat > $out/index.html << EOF
         <!DOCTYPE html>
         <html>
         <head>
@@ -82,6 +82,7 @@ in
           </script>
         </body>
         </html>
+        EOF
       '';
 
       nativeBuildInputs = nativeRustToolchain ++ (with pkgs; [ ]);
