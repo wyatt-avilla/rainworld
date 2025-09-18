@@ -71,14 +71,14 @@ in
         <html>
         <head>
           <meta charset="utf-8">
-          <title>Leptos App</title>
+          <title>Rainworld</title>
           <link rel="modulepreload" href="/${frontend}.js">
           <link rel="stylesheet" href="/main.css">
         </head>
         <body>
           <script type="module">
-            import init, { hydrate } from './${frontend}.js';
-            init().then(hydrate);
+            import init from './${frontend}.js';
+            init();
           </script>
         </body>
         </html>

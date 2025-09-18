@@ -1,6 +1,7 @@
 use super::graph::Graph;
-use super::interactivity_test::InteractivityTest;
+use super::plantbox::PlantBox;
 use leptos::prelude::*;
+use shared::plant::ScientificPlantName;
 use stylers::style;
 
 #[component]
@@ -19,7 +20,10 @@ pub fn App() -> impl IntoView {
     view! { class = styler_class,
       <div>
         <Graph dim_px=400 />
-        <InteractivityTest />
+        <PlantBox name="Plant Name".to_string() scientific_name=&ScientificPlantName::FicusElastica  />
+        <PlantBox name="Other Plant Name".to_string() scientific_name=&ScientificPlantName::MonsteraDeliciosa />
+        <PlantBox name="Another Plant".to_string() scientific_name=&ScientificPlantName::DieffenbachiaReflector />
+        <PlantBox name="Final Plant".to_string() scientific_name=&ScientificPlantName::MonsteraDeliciosa />
       </div>
     }
 }
