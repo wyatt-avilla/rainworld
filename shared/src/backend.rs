@@ -1,10 +1,15 @@
+use std::collections::{BTreeSet, HashMap};
+
 use serde::{Deserialize, Serialize};
 
 pub const DEFAULT_SERVER_PORT: u16 = 8877;
 
-pub const READING_NOW_ENDPOINT: &str = "/api/get_reading";
+pub const READING_NOW_ENDPOINT: &str = "/api/get/now_reading";
+pub const HISTORIC_READING_ENDPOINT: &str = "/api/get/historic_readings";
 
-pub type Response = Result<Vec<super::plant::PlantWithReadings>, Error>;
+pub type ReadingResponse = Result<Vec<super::plant::PlantWithReadings>, Error>;
+
+pub type HomePageLoadResponse = Result<HomePageLoad, Error>;
 
 #[derive(thiserror::Error, Debug, Serialize, Deserialize, Clone)]
 pub enum Error {
@@ -16,4 +21,8 @@ pub enum Error {
 
     #[error("Internal error occurred while trying to query data")]
     Internal,
+
+    #[error("Error with ESP32")]
+    Esp32(super::esp32::Error),
+}
 }

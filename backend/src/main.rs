@@ -5,7 +5,7 @@ use axum::routing::get;
 use axum::{Json, Router};
 use clap::Parser;
 use database::DatabaseClientError;
-use hardware::{HardwareInterface, HardwareInterfaceError};
+use hardware::HardwareInterface;
 use interval_readings::read_sensor_and_store_every_n_seconds;
 use serde_json::{Value, json};
 
@@ -16,19 +16,26 @@ mod interval_readings;
 
 const TABLE_NAME: &str = "rainworld_readings";
 
-async fn get_reading_handler(
+async fn now_readings(
     State(hardware): State<Arc<HardwareInterface>>,
-) -> Json<Result<shared::esp32::Response, HardwareInterfaceError>> {
-    let reading = hardware.get_reading().await;
-    if let Err(e) = &reading {
-        log::error!("Error while trying to get reading ({e})");
-    }
-    Json(reading)
+) -> Json<shared::backend::ReadingResponse> {
+    Json(match hardware.get_reading().await {
+        Ok(v) => v
+            .into_iter()
+            .map(|r| r.map_err(shared::backend::Error::Esp32))
+            .collect::<Result<Vec<_>, _>>(),
+        Err(e) => Err(match e {
+            hardware::HardwareInterfaceError::HttpRequestGet(_) => shared::backend::Error::Http,
+            hardware::HardwareInterfaceError::DeserializeError(_) => {
+                shared::backend::Error::Deserialize
+            }
+        }),
+    })
 }
 
-async fn read_entire_table(
+async fn historic_readings(
     State(db): State<Arc<database::Client>>,
-) -> Json<shared::backend::Response> {
+) -> Json<shared::backend::ReadingResponse> {
     let resp = db
         .query(format!("select * from {TABLE_NAME}").as_str())
         .await;
@@ -74,12 +81,9 @@ async fn main() -> anyhow::Result<()> {
 
     let app = Router::new()
         .route("/", get(root_handler))
-        .route(
-            shared::backend::READING_NOW_ENDPOINT,
-            get(get_reading_handler),
-        )
+        .route(shared::backend::READING_NOW_ENDPOINT, get(now_readings))
         .with_state(hardware_interface.clone())
-        .route("/api/read_table", get(read_entire_table))
+        .route("/api/read_table", get(historic_readings))
         .with_state(db_client.clone());
 
     log::info!("Running server on port {}", args.port);
