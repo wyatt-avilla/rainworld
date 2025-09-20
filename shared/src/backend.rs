@@ -25,4 +25,3 @@ pub enum Error {
     #[error("Error with ESP32")]
     Esp32(super::esp32::Error),
 }
-}
