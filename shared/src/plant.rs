@@ -2,6 +2,8 @@ use std::{fmt::Display, time::SystemTime};
 
 use serde::{Deserialize, Serialize};
 
+pub type ID = u16;
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct PlantWithReadings {
     pub plant: Plant,
@@ -11,7 +13,7 @@ pub struct PlantWithReadings {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Plant {
-    pub id: u16,
+    pub id: ID,
     pub name: String,
     pub scientific_name: ScientificPlantName,
 }
