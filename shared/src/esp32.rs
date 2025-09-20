@@ -9,3 +9,8 @@ pub enum Error {
     #[error("Couldn't read from moisture sensor")]
     Moisture,
 }
+
+pub enum WaterValveStatus {
+    Open,
+    Closed,
+}
