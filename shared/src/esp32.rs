@@ -1,8 +1,11 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 pub const READ_ENDPOINT: &str = "/api/read";
 
-pub type Response = Vec<Result<super::plant::PlantWithReadings, Error>>;
+pub type Reading = Vec<Result<super::plant::PlantWithReadings, Error>>;
+pub type WaterValveStatuses = Result<HashMap<super::plant::ID, WaterValveStatus>, Error>;
 
 #[derive(thiserror::Error, Debug, Serialize, Deserialize, Clone)]
 pub enum Error {
@@ -10,6 +13,7 @@ pub enum Error {
     Moisture,
 }
 
+#[derive(Serialize, Deserialize, Clone)]
 pub enum WaterValveStatus {
     Open,
     Closed,

@@ -4,6 +4,7 @@ use serde_json::json;
 use thiserror::Error;
 
 static DB_API_ENDPOINT: &str = "/api/v3/";
+pub const TABLE_NAME: &str = "rainworld_readings";
 
 #[derive(Error, Debug)]
 pub enum DatabaseClientError {
@@ -31,6 +32,16 @@ pub struct Client {
     db_url: url::Url,
     #[allow(clippy::struct_field_names)]
     http_client: reqwest::Client,
+}
+
+impl From<DatabaseClientError> for shared::backend::Error {
+    fn from(e: DatabaseClientError) -> Self {
+        match e {
+            DatabaseClientError::Http(_) => shared::backend::Error::Http,
+            DatabaseClientError::Deserialize(_) => shared::backend::Error::Deserialize,
+            _ => shared::backend::Error::Internal,
+        }
+    }
 }
 
 impl Client {
@@ -128,5 +139,12 @@ impl Client {
             .map_err(DatabaseClientError::Write)?;
 
         Ok(())
+    }
+
+    pub async fn historic_readings(
+        &self,
+    ) -> Result<Vec<shared::plant::PlantWithReadings>, DatabaseClientError> {
+        self.query(format!("select * from {TABLE_NAME}").as_str())
+            .await
     }
 }
