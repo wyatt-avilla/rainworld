@@ -43,6 +43,7 @@ impl HardwareInterface {
             .map_err(|e| HardwareInterfaceError::DeserializeError(e.to_string()))
     }
 
+    #[allow(clippy::unused_async)]
     pub async fn get_water_valve_statuses(
         &self,
     ) -> Result<shared::esp32::WaterValveStatuses, HardwareInterfaceError> {
